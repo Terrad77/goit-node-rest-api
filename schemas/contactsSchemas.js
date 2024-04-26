@@ -1,3 +1,5 @@
+//бібла валідації аналог yup
+// npm i Joi
 import Joi from "joi";
 
 // Schema for validating POST /api/contacts
@@ -12,6 +14,6 @@ export const updateContactSchema = Joi.object({
   name: Joi.string(),
   email: Joi.string().email(),
   phone: Joi.string(),
-})
-  .or("name", "email", "phone")
-  .options({ allowUnknown: true });
+});
+// .or("name", "email", "phone")
+// .options({ allowUnknown: true });

@@ -1,5 +1,6 @@
 import * as fs from "node:fs/promises";
 import path from "node:path";
+// вбудована в express бібла для створення ID, виклик: crypto.randomUUID()
 import crypto from "node:crypto";
 
 const contactsPath = path.resolve("db", "contacts.json");
