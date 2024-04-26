@@ -15,5 +15,3 @@ export const updateContactSchema = Joi.object({
   email: Joi.string().email(),
   phone: Joi.string(),
 });
-// .or("name", "email", "phone")
-// .options({ allowUnknown: true });
