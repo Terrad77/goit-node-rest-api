@@ -11,7 +11,7 @@ app.use(cors());
 // вар.1, midleware express для репарсеру req.body, тут оголошена глобально та спрацьовує на кожний http запит хоча потрібна лише для POST, PUT, PATCH
 // app.use(express.json());
 
-// вар.2,  bestpractic - використовуавти як локальну midleware в редюсері, передавати jsonParser перед (req, res) або перед викликом функції з (req, res) у contactsRouter.js
+// вар.2,  bestpractic - використовуавти як локальну midleware в роутах, передавати jsonParser перед (req, res) або перед викликом функції з (req, res) у contactsRouter.js
 // const jsonParser = express.json();
 
 app.use("/api/contacts", contactsRouter);
