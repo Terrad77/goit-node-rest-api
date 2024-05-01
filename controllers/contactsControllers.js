@@ -4,13 +4,15 @@ import {
   createContactSchema,
   updateContactSchema,
 } from "../schemas/contactsSchemas.js";
+import Contact from "../models/Contact.js";
 
 // GET /api/contacts
 export const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await contactsService.listContacts();
+    const contacts = await Contact.find();
     return res.status(200).json(contacts);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 };
@@ -19,7 +21,7 @@ export const getAllContacts = async (req, res, next) => {
 export const getOneContact = async (req, res, next) => {
   const { id } = req.params; // Отримуємо id з URL;
   try {
-    const contact = await contactsService.getContactById(id);
+    const contact = await Contact.findById(id);
     if (!contact) {
       throw HttpError(404);
     }
@@ -33,7 +35,7 @@ export const getOneContact = async (req, res, next) => {
 export const deleteContact = async (req, res, next) => {
   const { id } = req.params;
   try {
-    const removedContact = await contactsService.removeContact(id);
+    const removedContact = await Contact.findByIdAndDelete(id);
     if (!removedContact) {
       throw HttpError(404);
     }
@@ -51,8 +53,9 @@ export const createContact = async (req, res, next) => {
     if (error) {
       throw HttpError(400);
     }
-    const newContact = await contactsService.addContact(name, email, phone);
-    res.status(201).json(newContact);
+    const newContact = new Contact({ name, email, phone });
+    const savedContact = await newContact.save();
+    res.status(201).json(savedContact);
   } catch (error) {
     next(error);
   }
@@ -67,7 +70,7 @@ export const updateContact = async (req, res, next) => {
     if (error) {
       throw HttpError(400, "Body must have at least one field");
     }
-    const updatedContact = await contactsService.updateContact(id, {
+    const updatedContact = await Contact.findByIdAndUpdate(id, {
       name,
       email,
       phone,
@@ -80,4 +83,3 @@ export const updateContact = async (req, res, next) => {
     next(error);
   }
 };
-

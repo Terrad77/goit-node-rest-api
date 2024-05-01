@@ -1,8 +1,32 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-
 import contactsRouter from "./routes/contactsRouter.js";
+import mongoose from "mongoose";
+
+// const mongoose = require("mongoose");
+
+//connection string
+const DB_URI =
+  "mongodb+srv://Dima:terrad77@cluster0.wrlinfw.mongodb.net/?retryWrites=true&w=majority";
+async function run() {
+  try {
+    //connection to DB
+    await mongoose.connect(DB_URI);
+    //try ping to DB for test
+    // await mongoose.connection.db.admin().command({ ping: 1 });
+    console.info("Database connection successful");
+  } catch (error) {
+    console.error(error);
+  } finally {
+    //disconect from DB
+    // await mongoose.disconnect();
+    await process.exit(1);
+  }
+}
+//testing
+// run();
+// run().catch((error) => console.error(error));
 
 const app = express();
 
