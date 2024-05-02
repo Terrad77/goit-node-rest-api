@@ -115,9 +115,8 @@ async function updateStatusContact(contactId, favorite) {
 export const updateContactFavoriteStatus = async (req, res, next) => {
   const { contactId } = req.params;
   const { favorite } = req.body;
-  // Якщо з body все добре, викликає функцію updateStatusContact (contactId, body)
 
-  // Перевірка тіла запиту
+  // Перевірка body запиту
   const { error } = validateFavoriteBody.validate(req.body);
 
   // Якщо тіло запиту не відповідає схемі, повертаємо помилку 400 (Bad Request)
@@ -125,6 +124,7 @@ export const updateContactFavoriteStatus = async (req, res, next) => {
     // details[0].message - перша помилка при перевірці тіла запиту
     return res.status(400).json({ message: error.details[0].message });
   }
+  // Якщо з body все добре, виклик ф-ції updateStatusContact (contactId, body)
   try {
     const updatedContact = await updateStatusContact(contactId, favorite);
     if (!updatedContact) {

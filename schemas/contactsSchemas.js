@@ -16,7 +16,7 @@ export const updateContactSchema = Joi.object({
   phone: Joi.string(),
 });
 
-// Перевірка тіла запиту
+// Schema for validating PATCH /api/contacts/:contactId/favorite
 export const validateFavoriteBody = Joi.object({
   favorite: Joi.boolean().required(),
 });
