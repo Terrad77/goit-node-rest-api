@@ -24,7 +24,7 @@ async function run() {
     await process.exit(1);
   }
 }
-//testing
+//testing function run
 // run();
 // run().catch((error) => console.error(error));
 
