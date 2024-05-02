@@ -33,8 +33,7 @@ app.use((err, req, res, next) => {
 // const uri = "mongodb+srv://<username>:<password>@cluster0.wrlinfw.mongodb.net/<database_name>?retryWrites=true&w=majority&appName=Cluster0";
 // де треба змінити на дійсні значення <username>, <password>, <database_name>
 
-// console.log(process.env.DB_URI);
-
+// призначення змінні значення з  .env
 const DB_URI = process.env.DB_URI;
 
 // Підключення до бази даних перед запуском сервера

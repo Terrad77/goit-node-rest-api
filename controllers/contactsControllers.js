@@ -1,10 +1,11 @@
 import HttpError from "../helpers/HttpError.js";
-import contactsService from "../services/contactsServices.js";
 import {
   createContactSchema,
   updateContactSchema,
+  validateFavoriteBody,
 } from "../schemas/contactsSchemas.js";
 import Contact from "../models/Contact.js";
+// import Joi from "joi";
 
 // GET /api/contacts
 export const getAllContacts = async (req, res, next) => {
@@ -70,13 +71,64 @@ export const updateContact = async (req, res, next) => {
     if (error) {
       throw HttpError(400, "Body must have at least one field");
     }
-    const updatedContact = await Contact.findByIdAndUpdate(id, {
-      name,
-      email,
-      phone,
-    });
+    const updatedContact = await Contact.findByIdAndUpdate(
+      id,
+      {
+        name,
+        email,
+        phone,
+      },
+
+      // За замовчуванням { new: false }, оновлення документу у MongoDB методом findByIdAndUpdate, повертає оригінал документа (до оновлення) якщо передати третім аргументом об'єкт { new: true }, метод поверне одразу оновленну версію документа.
+      { new: true }
+    );
     if (!updatedContact) {
       throw HttpError(404);
+    }
+    res.status(200).json(updatedContact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ф-ція updateStatusContact
+async function updateStatusContact(contactId, favorite) {
+  try {
+    // Оновлюємо поле favorite контакту за його ідентифікатором
+    const updatedContact = await Contact.findByIdAndUpdate(
+      contactId,
+      { favorite },
+      { new: true }
+    );
+    // Перевіряємо, чи знайдено контакт за вказаним ID
+    if (!updatedContact) {
+      return null;
+    }
+    // Повертаємо оновлений контакт
+    return updatedContact;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// PATCH /api/contacts/:contactId/favorite
+export const updateContactFavoriteStatus = async (req, res, next) => {
+  const { contactId } = req.params;
+  const { favorite } = req.body;
+  // Якщо з body все добре, викликає функцію updateStatusContact (contactId, body)
+
+  // Перевірка тіла запиту
+  const { error } = validateFavoriteBody.validate(req.body);
+
+  // Якщо тіло запиту не відповідає схемі, повертаємо помилку 400 (Bad Request)
+  if (error) {
+    // details[0].message - перша помилка при перевірці тіла запиту
+    return res.status(400).json({ message: error.details[0].message });
+  }
+  try {
+    const updatedContact = await updateStatusContact(contactId, favorite);
+    if (!updatedContact) {
+      throw HttpError(404, "Not found");
     }
     res.status(200).json(updatedContact);
   } catch (error) {
