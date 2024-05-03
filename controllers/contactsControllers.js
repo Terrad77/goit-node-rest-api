@@ -5,7 +5,6 @@ import {
   validateFavoriteBody,
 } from "../schemas/contactsSchemas.js";
 import Contact from "../models/Contact.js";
-// import Joi from "joi";
 
 // GET /api/contacts
 export const getAllContacts = async (req, res, next) => {
@@ -22,6 +21,9 @@ export const getAllContacts = async (req, res, next) => {
 export const getOneContact = async (req, res, next) => {
   const { id } = req.params; // Отримуємо id з URL;
   try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw HttpError(400, "Invalid ObjectId format");
+    }
     const contact = await Contact.findById(id);
     if (!contact) {
       throw HttpError(404);
