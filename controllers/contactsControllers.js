@@ -6,6 +6,8 @@ import {
 } from "../schemas/contactsSchemas.js";
 import Contact from "../models/Contact.js";
 
+import mongoose from "mongoose";
+
 // GET /api/contacts
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -20,7 +22,9 @@ export const getAllContacts = async (req, res, next) => {
 // GET /api/contacts/:id
 export const getOneContact = async (req, res, next) => {
   const { id } = req.params; // Отримуємо id з URL;
+
   try {
+    //перевірка id на належність до ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw HttpError(400, "Invalid ObjectId format");
     }
@@ -30,7 +34,8 @@ export const getOneContact = async (req, res, next) => {
     }
     res.status(200).json(contact);
   } catch (error) {
-    res.status(error.status).json({ message: error.message });
+    const status = error.status || 500; // обробка error як що статус відсутний
+    res.status(status).json({ message: error.message });
   }
 };
 
@@ -38,6 +43,10 @@ export const getOneContact = async (req, res, next) => {
 export const deleteContact = async (req, res, next) => {
   const { id } = req.params;
   try {
+    //перевірка id на належність до ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw HttpError(400, "Invalid ObjectId format");
+    }
     const removedContact = await Contact.findByIdAndDelete(id);
     if (!removedContact) {
       throw HttpError(404);
@@ -68,6 +77,10 @@ export const createContact = async (req, res, next) => {
 export const updateContact = async (req, res, next) => {
   const { id } = req.params;
   try {
+    //перевірка id на належність до ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw HttpError(400, "Invalid ObjectId format");
+    }
     const { name, email, phone } = req.body;
     const { error } = updateContactSchema.validate(req.body);
     if (error) {
@@ -128,6 +141,10 @@ export const updateContactFavoriteStatus = async (req, res, next) => {
   }
   // Якщо з body все добре, виклик ф-ції updateStatusContact (contactId, body)
   try {
+    //перевірка contactId на належність до ObjectId
+    if (!mongoose.Types.ObjectId.isValid(contactId)) {
+      throw HttpError(400, "Invalid ObjectId format");
+    }
     const updatedContact = await updateStatusContact(contactId, favorite);
     if (!updatedContact) {
       throw HttpError(404, "Not found");
