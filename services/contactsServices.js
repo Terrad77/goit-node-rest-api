@@ -70,7 +70,6 @@ async function updateContact(id, { name, email, phone }) {
     await writeContacts(contacts);
     return contacts[index];
   }
-
   return null;
 }
 
