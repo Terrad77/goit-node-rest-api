@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 // схема для збереження моделі колекції contacts у MongoDB
 const contactSchema = new mongoose.Schema(
@@ -17,11 +17,16 @@ const contactSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // щоб кожен користувач бачив тільки свої контакти, додаємо властивість owner, де 'user' - назва колекції де зберігаються користувачи
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+    },
   },
   { versionKey: false } // відключення додавання параметру __v (версіонування)
 );
 
-// Створення моделі на основі схеми
+// Створення моделі "Contact" на основі схеми contactSchema
 const Contact = mongoose.model("Contact", contactSchema);
 
 export default Contact;
