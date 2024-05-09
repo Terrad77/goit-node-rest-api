@@ -5,12 +5,14 @@ import contactsRouter from "./routes/contactsRouter.js";
 import authRouter from "./routes/authRouter.js";
 import mongoose from "mongoose";
 // завантаження .env file into process.env
-// зробити npm i dotenv, створити file *.env, імпортувати модуль
+// зробити npm i dotenv, створити file *.env, імпортувати модуль dotenv
 import "dotenv/config";
 
 const app = express();
 app.use(morgan("tiny"));
 app.use(cors());
+// для глобального перетворення результатів обробки методу send(), що надсилає відповідь у вигляді тексту або HTML в об'єкт JSON
+app.use(express.json());
 
 // використання  middleware для парсингу JSON
 // вар.1,  app.use(express.json()); midleware express для репарсеру req.body, оголоcити глобально, що буде спрацьовувати на кожний http запит, за потреб лише для POST, PUT, PATCH
@@ -34,7 +36,7 @@ app.use((err, req, res, next) => {
 // const uri = "mongodb+srv://<username>:<password>@cluster0.wrlinfw.mongodb.net/<database_name>?retryWrites=true&w=majority&appName=Cluster0";
 // де треба змінити на дійсні значення <username>, <password>, <database_name>
 
-// отримання значення URI бази даних з змінної середовища DB_URI.
+// отримання значення URI бази даних з змінної середовища DB_URI, файлу .env
 const DB_URI = process.env.DB_URI;
 
 // Підключення до бази даних перед запуском сервера

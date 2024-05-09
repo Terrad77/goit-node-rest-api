@@ -65,7 +65,12 @@ export const createContact = async (req, res, next) => {
     if (error) {
       throw HttpError(400);
     }
-    const newContact = new Contact({ name, email, phone });
+    const newContact = new Contact({
+      name,
+      email,
+      phone,
+      ownerId: req.user.id, //додаємо id користувача
+    });
     const savedContact = await newContact.save();
     res.status(201).json(savedContact);
   } catch (error) {
