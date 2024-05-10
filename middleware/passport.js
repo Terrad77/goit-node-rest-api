@@ -17,7 +17,7 @@ const options = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
 };
 
-// JWT Strategy
+// JWT Strategy, дає читати JWT-токен із заголовка HTTP Authorization для кожного вхідного запиту
 passport.use(
   new Strategy(options, async (payload, done) => {
     try {

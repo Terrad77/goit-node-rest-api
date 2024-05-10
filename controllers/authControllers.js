@@ -109,8 +109,7 @@ export const loginUser = async (req, res, next) => {
 export const logoutUser = async (req, res, next) => {
   try {
     // Отримати id поточного користувача з req.user
-    const userId = req.user._id;
-    console.log("userId:" + userId);
+    const userId = req.user._id; // use "id" if middleware authToken
 
     // пошук користувача у моделі User за _id
     const user = await User.findById(userId);

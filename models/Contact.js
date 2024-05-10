@@ -20,7 +20,7 @@ const contactSchema = new mongoose.Schema(
     // щоб кожен користувач бачив тільки свої контакти, додаємо властивість owner, де 'user' - назва колекції де зберігаються користувачи
     owner: {
       type: Schema.Types.ObjectId,
-      ref: "user",
+      ref: "user", // вказує Mongoose, що значення поля owner буде посилатися на документи з колекції "user"
     },
   },
   { versionKey: false } // відключення додавання параметру __v (версіонування)
