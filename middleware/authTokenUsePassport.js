@@ -1,4 +1,3 @@
-// import { decode } from "jsonwebtoken";
 import passport from "./passport.js";
 
 export const authTokenUsePassport = (req, res, next) => {
@@ -7,10 +6,6 @@ export const authTokenUsePassport = (req, res, next) => {
       return res.status(401).json({ message: "Not authorized" });
     }
     req.user = user;
-    // req.user = {
-    //   id: decode.id,
-    //   name: decode.name,
-    // };
     next();
   })(req, res, next);
 };

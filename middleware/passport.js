@@ -2,7 +2,6 @@
 import passport from "passport";
 // npm install passport-jwt
 import passportJWT from "passport-jwt";
-// import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import User from "../models/User.js"; // Імпорт моделі
 import "dotenv/config"; // імпорт модулю dotenv
 
