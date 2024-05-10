@@ -6,9 +6,9 @@ import passportJWT from "passport-jwt";
 import User from "../models/User.js"; // Імпорт моделі
 import "dotenv/config"; // імпорт модулю dotenv
 
-const secret = process.env.SECRET;
-const ExtractJWT = passportJWT.ExtractJwt;
-const Strategy = passportJWT.Strategy;
+const secret = process.env.SECRET; //import SECRET from .env
+const ExtractJWT = passportJWT.ExtractJwt; //import ExtractJWT from "passport-jwt"
+const Strategy = passportJWT.Strategy; //import Strategy from "passport-jwt"
 
 // Опції налаштування стратегії passport-jwt
 const options = {
@@ -31,7 +31,4 @@ passport.use(
     }
   })
 );
-
-// export default passport.authenticate("jwt", { session: false });
-
 export default passport;

@@ -1,5 +1,3 @@
-// import passport.authenticate("jwt", { session: false }) from "./passport.js";
-import passport from "../middleware/passport.js";
 import jwt from "jsonwebtoken";
 
 export const authToken = (req, res, next) => {

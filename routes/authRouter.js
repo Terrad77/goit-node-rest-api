@@ -1,6 +1,7 @@
 import express from "express";
 import AuthController from "../controllers/authControllers.js";
 import authToken from "../middleware/authToken.js";
+import authTokenUsePassport from "../middleware/authTokenUsePassport.js";
 
 // midleware для репарсеру req.body
 const jsonParser = express.json();
@@ -13,6 +14,8 @@ usersRouter.post("/register", jsonParser, AuthController.registerUser);
 
 usersRouter.post("/login", jsonParser, AuthController.loginUser);
 
-usersRouter.post("/logout", authToken, AuthController.logoutUser);
+usersRouter.post("/logout", authTokenUsePassport, AuthController.logoutUser);
+
+usersRouter.post("/current", authTokenUsePassport, AuthController.logoutUser);
 
 export default usersRouter;

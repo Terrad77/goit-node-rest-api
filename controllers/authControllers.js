@@ -110,6 +110,7 @@ export const logoutUser = async (req, res, next) => {
   try {
     // Отримати id поточного користувача з req.user
     const userId = req.user._id;
+    console.log("userId:" + userId);
 
     // пошук користувача у моделі User за _id
     const user = await User.findById(userId);
@@ -120,7 +121,7 @@ export const logoutUser = async (req, res, next) => {
       return res.status(401).send({ message: "Not authorized" });
     }
 
-    // Видалити токен у поточного користувача
+    // Видалити токен у поточного користувача та зберегти у БД
     user.token = null;
     await user.save();
 
@@ -131,7 +132,7 @@ export const logoutUser = async (req, res, next) => {
   }
 };
 
-// GET /user/list
+// GET /users/ list
 // export const listUser = async (req, res, next) => {
 //   const { username } = req.user;
 //   res.json({
