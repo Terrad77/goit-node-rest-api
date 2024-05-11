@@ -131,6 +131,16 @@ export const logoutUser = async (req, res, next) => {
   }
 };
 
+// -------------------- Отримати дані поточного юзера по токені  --------------- //
+// GET / users / current;
+export const getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await Contact.findById(req.user.id);
+    return console.log(user);
+  } catch (error) {
+    next(error);
+  }
+};
 // GET /users/ list
 // export const listUser = async (req, res, next) => {
 //   const { username } = req.user;
@@ -147,4 +157,5 @@ export default {
   registerUser,
   loginUser,
   logoutUser,
+  getCurrentUser,
 };

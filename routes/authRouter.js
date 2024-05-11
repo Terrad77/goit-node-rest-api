@@ -18,4 +18,10 @@ usersRouter.post("/logout", authTokenUsePassport, AuthController.logoutUser);
 
 usersRouter.post("/current", authTokenUsePassport, AuthController.logoutUser);
 
+usersRouter.get(
+  "/users/current",
+  authTokenUsePassport,
+  AuthController.getCurrentUser
+);
+
 export default usersRouter;

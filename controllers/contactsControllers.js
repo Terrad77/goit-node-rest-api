@@ -154,7 +154,7 @@ async function updateStatusContact(contactId, favorite) {
     // Повертаємо оновлений контакт
     return updatedContact;
   } catch (error) {
-    throw error;
+    next(error);
   }
 }
 
@@ -172,23 +172,23 @@ export const updateContactFavoriteStatus = async (req, res, next) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  // пошук контакту за його ідентифікатором
-  const contact = await Contact.findById(contactId);
-  console.log(contact._id);
-  if (!contact) {
-    throw HttpError(404);
-    return res.status(404).json({ message: error.message });
-  }
-  // перевірка належності контакта користувачу
-  if (contact.owner.toString() !== req.user.id) {
-    throw HttpError(403, "Contact not found");
-  }
-
   // Якщо з body все добре, виклик ф-ції updateStatusContact (contactId, body)
   try {
+    // пошук контакту за його ідентифікатором
+    const contact = await Contact.findById(contactId);
+    // console.log(contact);
+    if (!contact) {
+      return res.status(404).json({ message: "Contact not found" });
+    }
+
+    // перевірка належності контакта користувачу
+    if (contact.owner.toString() !== req.user.id) {
+      throw HttpError(403, "Contact not found");
+    }
+
     //перевірка contactId на належність до ObjectId
     if (!mongoose.Types.ObjectId.isValid(contactId)) {
-      throw HttpError(400, "Invalid ObjectId format");
+      return res.status(400).json({ message: "Invalid ObjectId format" });
     }
     const updatedContact = await updateStatusContact(contactId, favorite);
     if (!updatedContact) {
@@ -199,6 +199,7 @@ export const updateContactFavoriteStatus = async (req, res, next) => {
     next(error);
   }
 };
+
 export default {
   getAllContacts,
   getOneContact,
