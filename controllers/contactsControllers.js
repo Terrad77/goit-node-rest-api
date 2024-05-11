@@ -9,9 +9,21 @@ import Contact from "../models/Contact.js";
 import mongoose from "mongoose";
 
 // GET /api/contacts
+// GET /contacts?page=1&limit=20
 export const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await Contact.find({ owner: req.user.id }); // передамо в параметри фільтр - об'єкт з полем id користувача
+    // імпорт параметрів запиту page та limit з url запиту
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20; // or default limit is 20
+
+    // зсув для початку отримання контактів з правильної позиції (у MongoDB перша сторінка має індекс 0 )
+    const skip = (page - 1) * limit;
+
+    // передамо в параметри метода фільтр - об'єкт з полем id користувача
+    const contacts = await Contact.find({ owner: req.user.id })
+      // додамо до запиту к БД методи пагінації MongoDB
+      .skip(skip)
+      .limit(limit);
     return res.status(200).json(contacts);
   } catch (error) {
     console.error(error);
