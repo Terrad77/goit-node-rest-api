@@ -6,22 +6,24 @@ import authTokenUsePassport from "../middleware/authTokenUsePassport.js";
 // midleware для репарсеру req.body
 const jsonParser = express.json();
 
-// сторення об'єкта роутера express
-const usersRouter = express.Router();
+// створення об'єкта роутера express
+const authRouter = express.Router();
 
 // Маршрути
-usersRouter.post("/register", jsonParser, AuthController.registerUser);
+authRouter.post("/register", jsonParser, AuthController.registerUser);
 
-usersRouter.post("/login", jsonParser, AuthController.loginUser);
+authRouter.post("/login", jsonParser, AuthController.loginUser);
 
-usersRouter.post("/logout", authTokenUsePassport, AuthController.logoutUser);
+authRouter.post("/logout", authTokenUsePassport, AuthController.logoutUser);
 
-usersRouter.post("/current", authTokenUsePassport, AuthController.logoutUser);
+authRouter.post("/current", authTokenUsePassport, AuthController.logoutUser);
 
-usersRouter.get(
-  "/current",
+authRouter.get("/current", authTokenUsePassport, AuthController.getCurrentUser);
+
+authRouter.patch(
+  "/users",
   authTokenUsePassport,
-  AuthController.getCurrentUser
+  AuthController.updateSubscription
 );
 
-export default usersRouter;
+export default authRouter;

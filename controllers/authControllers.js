@@ -152,21 +152,50 @@ export const getCurrentUser = async (req, res, next) => {
     next(error);
   }
 };
-// GET /users/ list
-// export const listUser = async (req, res, next) => {
-//   const { username } = req.user;
-//   res.json({
-//     status: "success",
-//     code: 200,
-//     data: {
-//       message: `Authorization was successful: ${username}`,
-//     },
-//   });
-// };
+
+//-------------- оновлення підписки ---------------------//
+// PATCH / users;
+
+export const updateSubscription = async (req, res, next) => {
+  const validSubscriptions = ["starter", "pro", "business"];
+  const { subscription } = req.body;
+
+  // Перевірка, чи передане значення підписки є дійсним
+  if (!validSubscriptions.includes(subscription)) {
+    return res.status(400).json({ message: "Invalid subscription value" });
+  }
+
+  try {
+    // Отримання ідентифікатора користувача з токена
+    const userId = req.user.id;
+
+    // Пошук користувача за ідентифікатором
+    const user = await User.findById(userId);
+
+    // Перевірка, чи знайдено користувача
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Оновлення підписки користувача
+    user.subscription = subscription;
+    await user.save();
+
+    // Відправка відповіді з оновленими даними користувача
+    res
+      .status(200)
+      .json({
+        message: "Subscription updated successfully",
+        user: { email: user.email, subscription: user.subscription },
+      });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export default {
   registerUser,
   loginUser,
   logoutUser,
   getCurrentUser,
+  updateSubscription,
 };

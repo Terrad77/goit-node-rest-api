@@ -16,15 +16,29 @@ export const getAllContacts = async (req, res, next) => {
     // імпорт параметрів запиту page та limit з url запиту
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20; // or default limit is 20
+
     // Отримання ідентифікатора користувача з об'єкта запиту
     const userId = req.user.id;
 
     // Створення об'єкта для фільтрації з основним фільтром за власником контактів
     const filter = { owner: userId };
 
-    // Перевірка, чи існує запит для фільтрації за полем favorite та додавання умови до фільтру, що враховує обидва значення параметра favorite
-    if (req.query.favorite === "true" || req.query.favorite === "false") {
-      filter.favorite = req.query.favorite === "true";
+    // Отримання значення поля favorite з запиту
+    const favorite = req.query.favorite;
+
+    // Перевірка, чи передане значення поля favorite є дійсним
+    if (
+      favorite !== undefined &&
+      !["true", "false"].includes(favorite.toLowerCase())
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Invalid value for favorite field" });
+    }
+
+    // Додавання умови до фільтру, якщо передане значення favorite є дійсним
+    if (favorite !== undefined) {
+      filter.favorite = favorite.toLowerCase() === "true";
     }
 
     // зсув для початку отримання контактів з правильної позиції (у MongoDB перша сторінка має індекс 0 )
