@@ -10,17 +10,28 @@ import mongoose from "mongoose";
 
 // GET /api/contacts
 // GET /contacts?page=1&limit=20
+// GET /contacts?favorite=true
 export const getAllContacts = async (req, res, next) => {
   try {
     // імпорт параметрів запиту page та limit з url запиту
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20; // or default limit is 20
+    // Отримання ідентифікатора користувача з об'єкта запиту
+    const userId = req.user.id;
+
+    // Створення об'єкта для фільтрації з основним фільтром за власником контактів
+    const filter = { owner: userId };
+
+    // Перевірка, чи існує запит для фільтрації за полем favorite та додавання умови до фільтру, що враховує обидва значення параметра favorite
+    if (req.query.favorite === "true" || req.query.favorite === "false") {
+      filter.favorite = req.query.favorite === "true";
+    }
 
     // зсув для початку отримання контактів з правильної позиції (у MongoDB перша сторінка має індекс 0 )
     const skip = (page - 1) * limit;
 
-    // передамо в параметри метода фільтр - об'єкт з полем id користувача
-    const contacts = await Contact.find({ owner: req.user.id })
+    // передамо в параметри метода об'єкт - фільтр
+    const contacts = await Contact.find(filter)
       // додамо до запиту к БД методи пагінації MongoDB
       .skip(skip)
       .limit(limit);
