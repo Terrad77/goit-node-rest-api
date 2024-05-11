@@ -1,6 +1,6 @@
 import express from "express";
 import AuthController from "../controllers/authControllers.js";
-// import authToken from "../middleware/authToken.js";
+
 import authTokenUsePassport from "../middleware/authTokenUsePassport.js";
 
 // midleware для репарсеру req.body
@@ -19,7 +19,7 @@ usersRouter.post("/logout", authTokenUsePassport, AuthController.logoutUser);
 usersRouter.post("/current", authTokenUsePassport, AuthController.logoutUser);
 
 usersRouter.get(
-  "/users/current",
+  "/current",
   authTokenUsePassport,
   AuthController.getCurrentUser
 );

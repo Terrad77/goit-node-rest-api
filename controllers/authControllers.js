@@ -135,8 +135,19 @@ export const logoutUser = async (req, res, next) => {
 // GET / users / current;
 export const getCurrentUser = async (req, res, next) => {
   try {
-    const user = await Contact.findById(req.user.id);
-    return console.log(user);
+    // Отримати id поточного користувача з req.user
+    const userId = req.user._id; // use "id" if middleware authToken
+
+    // пошук користувача у моделі User за _id
+    const user = await User.findById(userId);
+
+    // Перевірити, чи користувач існує
+    if (user === null) {
+      // Logout unauthorized error
+      return res.status(401).send({ message: "Not authorized" });
+    }
+    const result = { email: user.email, subscription: user.subscription };
+    return res.status(200).send(result);
   } catch (error) {
     next(error);
   }
