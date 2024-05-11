@@ -20,10 +20,6 @@ authRouter.post("/current", authTokenUsePassport, AuthController.logoutUser);
 
 authRouter.get("/current", authTokenUsePassport, AuthController.getCurrentUser);
 
-authRouter.patch(
-  "/users",
-  authTokenUsePassport,
-  AuthController.updateSubscription
-);
+authRouter.patch("/", authTokenUsePassport, AuthController.updateSubscription);
 
 export default authRouter;
