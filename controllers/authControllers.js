@@ -1,5 +1,4 @@
-import HttpError from "../helpers/HttpError.js";
-import { registerUserSchema } from "../schemas/usersSchemas.js";
+import registerUserSchema from "../schemas/usersSchemas.js";
 import User from "../models/User.js";
 
 //npm i bcrypt - бібл хешування
@@ -7,8 +6,11 @@ import bcrypt from "bcrypt";
 
 // npm install jsonwebtoken
 import jwt from "jsonwebtoken";
+// генератор аватарів
+import gravatar from "gravatar";
 
 // ----------------- Реєстрація нового користувача ---------- //
+
 // POST /api/users/register
 export const registerUser = async (req, res, next) => {
   // Валідація тіла запиту за схемою Joi
@@ -26,14 +28,20 @@ export const registerUser = async (req, res, next) => {
       // Registration conflict error
       return res.status(409).send({ message: "Email in use" });
     }
+    // Витягаємо email з тіла запиту
+    const { email, password } = req.body;
 
     // Хешування паролю у bcrypt з кількістю salt = 10
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    // Створення нового користувача
+    // створення  URL на автар за email користувача
+    const avatar = gravatar.url(email, { s: "250", d: "retro" }, true);
+
+    // Створення нового користувача + URL до згенерованого аватару
     await User.create({
-      email: req.body.email,
+      email: email,
       password: hashedPassword,
+      avatarURL: avatar,
     });
 
     // Registration success response
@@ -181,12 +189,10 @@ export const updateSubscription = async (req, res, next) => {
     await user.save();
 
     // Відправка відповіді з оновленими даними користувача
-    res
-      .status(200)
-      .json({
-        message: "Subscription updated successfully",
-        user: { email: user.email, subscription: user.subscription },
-      });
+    res.status(200).json({
+      message: "Subscription updated successfully",
+      user: { email: user.email, subscription: user.subscription },
+    });
   } catch (error) {
     next(error);
   }

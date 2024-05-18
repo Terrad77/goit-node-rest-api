@@ -4,23 +4,29 @@ import cors from "cors";
 import contactsRouter from "./routes/contactsRouter.js";
 import authRouter from "./routes/authRouter.js";
 import mongoose from "mongoose";
-// завантаження .env file into process.env
-// зробити npm i dotenv, створити file *.env, імпортувати модуль dotenv
+import authTokenUsePassport from "./middleware/authTokenUsePassport.js";
+import authToken from "./middleware/authToken.js";
+import usersRoutes from "./routes/usersRouter.js";
 import "dotenv/config";
+import path from "path";
 
+// Створення додатку
 const app = express();
-app.use(morgan("tiny"));
+
+// Middleware для логування, CORS та парсингу JSON
+app.use(morgan("tiny")); //
 app.use(cors());
-// для глобального перетворення результатів обробки методу send(), що надсилає відповідь у вигляді тексту або HTML в об'єкт JSON
 app.use(express.json());
 
-// використання  middleware для парсингу JSON
-// вар.1,  app.use(express.json()); midleware express для репарсеру req.body, оголоcити глобально, що буде спрацьовувати на кожний http запит, за потреб лише для POST, PUT, PATCH
-// вар.2, bestpractic - const jsonParser = express.json();  оголошувати як локальну midleware в роутах, передаючи в параметри змінну jsonParser перед (req, res) або перед викликом функції з (req, res) у contactsRouter.js
+// Налаштування роздачі статичних файлів
+// При переході за URL: http://localhost:3000/avatars/user.png - браузер відобразить зображення
+app.use("/avatars", express.static(path.resolve("public/avatars")));
 
-// підключення маршрутів - роутів
-app.use("/api/contacts", contactsRouter);
+// підключення до додатку маршрутів - роутів
+app.use("/api/contacts", authTokenUsePassport, contactsRouter);
 app.use("/api/users", authRouter);
+// Додай можливість поновлення аватарки, створивши ендпоінт /users/avatars
+app.use("/users", authToken, usersRoutes);
 
 // middleware обробки запитів неіснуючих маршруту
 app.use((_, res) => {
@@ -32,11 +38,7 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-// отримуєм connection string в Atlas>Database>Connect>Drivers за обраним драйвером:
-// const uri = "mongodb+srv://<username>:<password>@cluster0.wrlinfw.mongodb.net/<database_name>?retryWrites=true&w=majority&appName=Cluster0";
-// де треба змінити на дійсні значення <username>, <password>, <database_name>
-
-// отримання значення URI бази даних з змінної середовища DB_URI, файлу .env
+// імпорт URI бази даних з змінної середовища (DB_URI, файлу .env)
 const DB_URI = process.env.DB_URI;
 
 // Підключення до бази даних перед запуском сервера
@@ -45,7 +47,7 @@ mongoose
   .then(() => {
     console.info("Database connection successful");
 
-    // встановимо змінну PORT на значення, що передане через змінну середовища process.env.PORT ( якщо вона є визначеною) або порт 3000.
+    // призначення PORT
     const PORT = process.env.PORT || 3000;
 
     // Старт сервера після успішного підключення до бази даних
