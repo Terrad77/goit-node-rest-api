@@ -1,10 +1,22 @@
-import { loginUser } from "../controllers/authControllers"; // Імпортуємо контролер для тестування
-import jwt from "jsonwebtoken"; // Імпортуємо jwt для створення токена
+import { loginUser } from "../controllers/authControllers.js";
+import User from "../models/User.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { registerUserSchema } from "../schemas/usersSchemas.js";
+
+jest.mock("../models/User");
+jest.mock("bcrypt");
+jest.mock("jsonwebtoken");
+
+jest.mock("../schemas/usersSchemas", () => ({
+  registerUserSchema: {
+    validate: jest.fn().mockReturnValue({ error: null }),
+  },
+}));
 
 describe("loginUser", () => {
-  let req, res;
+  let req, res, next;
 
-  // Підготовка до тесту перед кожним запуском
   beforeEach(() => {
     req = {
       body: {
@@ -15,32 +27,73 @@ describe("loginUser", () => {
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
+      send: jest.fn(),
     };
+    next = jest.fn();
   });
 
   it("повинен повертати статус-код 200, токен та об'єкт користувача", async () => {
-    // Мокуємо функцію генерації токена
-    jwt.sign = jest.fn().mockReturnValue("mocked_token");
+    jest.setTimeout(10000); // Збільшуємо таймаут до 10 секунд
 
-    // Викликаємо контролер
-    await loginUser(req, res);
+    const token = "mocked_token";
+    const hashedPassword = "hashed_password";
 
-    // Перевіряємо, що статус відповіді дорівнює 200
+    User.findOne.mockResolvedValue({
+      email: req.body.email,
+      password: hashedPassword,
+      subscription: "starter",
+      id: "mocked_id",
+      save: jest.fn().mockResolvedValue(true), // Додаємо метод save
+    });
+
+    bcrypt.compare.mockResolvedValue(true);
+    jwt.sign.mockReturnValue(token);
+
+    await loginUser(req, res, next);
+
     expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      token,
+      user: {
+        email: req.body.email,
+        subscription: "starter",
+      },
+    });
+  });
 
-    // Перевіряємо, що був повернутий токен
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ token: "mocked_token" })
-    );
+  it("повинен повертати статус-код 400 при помилці валідації", async () => {
+    registerUserSchema.validate.mockReturnValueOnce({
+      error: { message: "Validation error" },
+    });
 
-    // Перевіряємо, що об'єкт користувача містить поля email та subscription типу String
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        user: {
-          email: expect.any(String),
-          subscription: expect.any(String),
-        },
-      })
-    );
+    await loginUser(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ message: "Validation error" });
+  });
+
+  it("повинен повертати статус-код 401 якщо email або пароль неправильні", async () => {
+    User.findOne.mockResolvedValue({
+      email: req.body.email,
+      password: "hashed_password",
+    });
+
+    bcrypt.compare.mockResolvedValue(false);
+
+    await loginUser(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send).toHaveBeenCalledWith({
+      message: "Email or password is wrong",
+    });
+  });
+
+  it("повинен викликати next(error) у разі помилки", async () => {
+    const error = new Error("Database error");
+    User.findOne.mockRejectedValue(error);
+
+    await loginUser(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(error);
   });
 });

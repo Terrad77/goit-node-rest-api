@@ -1,4 +1,4 @@
-import registerUserSchema from "../schemas/usersSchemas.js";
+import { registerUserSchema } from "../schemas/usersSchemas.js";
 import User from "../models/User.js";
 
 //npm i bcrypt - бібл хешування
@@ -82,31 +82,31 @@ export const loginUser = async (req, res, next) => {
     }
 
     // Створюємо payload об'єкт
-    const payload = {
-      id: existUser.id,
-    };
+    console.log("Creating token...");
+    const payload = { id: existUser.id };
 
     // Отримання значення  SECRET з змінної середовища, файлу .env
     const secret = process.env.SECRET;
 
-    // Виклик функції кодування з модуля jsonwebtoken
+    // створренння токену, виклик функції кодування з модуля jsonwebtoken
     const token = jwt.sign(payload, secret, { expiresIn: "23h" });
 
     // Збереження токена в поточному користувачі
+    console.log("Saving token...");
     existUser.token = token;
     await existUser.save();
 
     // Login success response
-    res.status(200).send({
+    console.log("Login success");
+    res.status(200).json({
       token: token,
       user: {
         email: req.body.email,
         subscription: "starter",
       },
     });
-    // Позначаємо завершення обробки запиту, щоб продовжити потік обробки запитів
-    next();
   } catch (error) {
+    console.log("Error:", error);
     next(error);
   }
 };
