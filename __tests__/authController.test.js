@@ -4,10 +4,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { registerUserSchema } from "../schemas/usersSchemas.js";
 
+// Мокаємо модуль User, bcrypt, jsonwebtoken та схему для симуляції їхньої поведінки.
 jest.mock("../models/User");
 jest.mock("bcrypt");
 jest.mock("jsonwebtoken");
-
 jest.mock("../schemas/usersSchemas", () => ({
   registerUserSchema: {
     validate: jest.fn().mockReturnValue({ error: null }),
@@ -17,6 +17,7 @@ jest.mock("../schemas/usersSchemas", () => ({
 describe("loginUser", () => {
   let req, res, next;
 
+  // симулюємо  HTTP-запит (beforeEach -виконання коду перед кожним тестом)
   beforeEach(() => {
     req = {
       body: {
@@ -32,18 +33,20 @@ describe("loginUser", () => {
     next = jest.fn();
   });
 
-  it("повинен повертати статус-код 200, токен та об'єкт користувача", async () => {
+  it("повинен повертати статус-код 200, токен та об'єкт {user: {email: typeString, subscription: typeString }}", async () => {
     jest.setTimeout(10000); // Збільшуємо таймаут до 10 секунд
 
     const token = "mocked_token";
     const hashedPassword = "hashed_password";
 
+    //   налаштування мок-об'єкту - симулюємо поведінку реального об'єкту моделі User, без підключення до БД
     User.findOne.mockResolvedValue({
+      //  Симулює, що знайдений користувач має email, який передається у запиті.
       email: req.body.email,
       password: hashedPassword,
       subscription: "starter",
       id: "mocked_id",
-      save: jest.fn().mockResolvedValue(true), // Додаємо метод save
+      save: jest.fn().mockResolvedValue(true),
     });
 
     bcrypt.compare.mockResolvedValue(true);
@@ -72,7 +75,7 @@ describe("loginUser", () => {
     expect(res.send).toHaveBeenCalledWith({ message: "Validation error" });
   });
 
-  it("повинен повертати статус-код 401 якщо email або пароль неправильні", async () => {
+  it("повинен повертати статус-код 401, якщо email або пароль неправильні", async () => {
     User.findOne.mockResolvedValue({
       email: req.body.email,
       password: "hashed_password",

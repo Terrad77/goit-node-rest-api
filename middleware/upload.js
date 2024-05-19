@@ -4,7 +4,6 @@ import multer from "multer";
 
 // Налаштування тимчасової директорії
 const tmpDir = path.resolve("tmp"); // C:\Users\terlo\Documents\GitHub\goit-node-rest-api\tmp
-console.log("tmpDir: " + tmpDir);
 
 // Налаштування multer для завантаження файлів
 const storage = multer.diskStorage({

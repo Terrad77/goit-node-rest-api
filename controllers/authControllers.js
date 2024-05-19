@@ -81,23 +81,22 @@ export const loginUser = async (req, res, next) => {
       return res.status(401).send({ message: "Email or password is wrong" });
     }
 
+    // -----------  створення токену ----------------- //
+
     // Створюємо payload об'єкт
     console.log("Creating token...");
     const payload = { id: existUser.id };
-
     // Отримання значення  SECRET з змінної середовища, файлу .env
     const secret = process.env.SECRET;
-
-    // створренння токену, виклик функції кодування з модуля jsonwebtoken
+    // збірка токену, виклик функції кодування з модуля jsonwebtoken
     const token = jwt.sign(payload, secret, { expiresIn: "23h" });
 
     // Збереження токена в поточному користувачі
-    console.log("Saving token...");
     existUser.token = token;
     await existUser.save();
 
     // Login success response
-    console.log("Login success");
+
     res.status(200).json({
       token: token,
       user: {
