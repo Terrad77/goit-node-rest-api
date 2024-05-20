@@ -20,10 +20,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    avatarURL: {
+      type: String,
+      default: null,
+    },
   },
   { versionKey: false } // відключення додавання параметру __v (версіонування)
 );
 // Створення моделі на основі схеми
-const User = mongoose.model("User", userSchema);
-
+// const User = mongoose.model("User", userSchema);
+// Перевірка, чи модель вже існує
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 export default User;
