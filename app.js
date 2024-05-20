@@ -18,7 +18,7 @@ app.use(morgan("tiny")); //
 app.use(cors());
 app.use(express.json());
 
-// Налаштування роздачі статичних файлів
+// Налаштування роздачі статичних файлів  (розширення app міддлварою   express.static('public'))
 // При переході за URL: http://localhost:3000/avatars/user.png - браузер відобразить зображення
 app.use("/avatars", express.static(path.resolve("public/avatars")));
 
