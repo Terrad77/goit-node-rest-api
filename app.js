@@ -5,7 +5,7 @@ import contactsRouter from "./routes/contactsRouter.js";
 import authRouter from "./routes/authRouter.js";
 import mongoose from "mongoose";
 import authTokenUsePassport from "./middleware/authTokenUsePassport.js";
-import authToken from "./middleware/authToken.js";
+// import authToken from "./middleware/authToken.js";
 import usersRoutes from "./routes/usersRouter.js";
 import "dotenv/config";
 import path from "path";
@@ -22,11 +22,10 @@ app.use(express.json());
 // При переході за URL: http://localhost:3000/avatars/user.png - браузер відобразить зображення
 app.use("/avatars", express.static(path.resolve("public/avatars")));
 
-// підключення до додатку маршрутів - роутів
+// підключення маршрутів - роутів до додатку app
 app.use("/api/contacts", authTokenUsePassport, contactsRouter);
 app.use("/api/users", authRouter);
-// Додай можливість поновлення аватарки, створивши ендпоінт /users/avatars
-app.use("/users", authToken, usersRoutes);
+app.use("/users", usersRoutes);
 
 // middleware обробки запитів неіснуючих маршруту
 app.use((_, res) => {

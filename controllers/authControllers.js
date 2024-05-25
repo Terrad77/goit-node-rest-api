@@ -1,13 +1,14 @@
 import { registerUserSchema } from "../schemas/usersSchemas.js";
 import User from "../models/User.js";
-
 //npm i bcrypt - бібл хешування
 import bcrypt from "bcrypt";
-
 // npm install jsonwebtoken
 import jwt from "jsonwebtoken";
 // генератор аватарів
 import gravatar from "gravatar";
+// npm install uuid - to create a random UUID for verificationToken
+import { v4 as uuidv4 } from "uuid";
+import sendVerificationEmail from "../services/mail.js";
 
 // ----------------- Реєстрація нового користувача ---------- //
 
@@ -21,33 +22,40 @@ export const registerUser = async (req, res, next) => {
   }
 
   try {
-    // Валідація моделі User, чи користувач з наданним email вже існує, findOne повертає об'єкт або null
+    // Валідація моделі User, чи користувач з наданним email вже існує ( метод findOne повертає об'єкт або null)
     const existUser = await User.findOne({ email: req.body.email });
 
     if (existUser !== null) {
       // Registration conflict error
       return res.status(409).send({ message: "Email in use" });
     }
-    // Витягаємо email з тіла запиту
+    // Витягаємо email та password users з тіла запиту
     const { email, password } = req.body;
 
     // Хешування паролю у bcrypt з кількістю salt = 10
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // створення  URL на автар за email користувача
     const avatar = gravatar.url(email, { s: "250", d: "retro" }, true);
 
-    // Створення нового користувача + URL до згенерованого аватару
+    // Генерація верифікаційного токена
+    const verificationToken = uuidv4();
+
+    // Створення нового користувача + URL до згенерованого аватару + verificationToken
     await User.create({
-      email: email,
+      email,
       password: hashedPassword,
       avatarURL: avatar,
+      verificationToken,
     });
+
+    // Відправка верифікаційного листа
+    await sendVerificationEmail(email, verificationToken);
 
     // Registration success response
     res.status(201).send({
       user: {
-        email: req.body.email,
+        email: email,
         subscription: "starter",
       },
     });
@@ -57,22 +65,26 @@ export const registerUser = async (req, res, next) => {
 };
 
 // ---------------- Отримання jwt-токена ------------------ //
+
 // POST /api/users/login
 export const loginUser = async (req, res, next) => {
   // Валідація тіла запиту за схемою Joi
   const { error } = registerUserSchema.validate(req.body);
+
   if (error) {
     // Login validation error
     return res.status(400).send({ message: error.message });
   }
+
   try {
-    // Валідація моделі User, чи користувач з наданним email вже існує у базі
+    // Валідація моделі User, чи користувач з наданним email вже існує у БД
     const existUser = await User.findOne({ email: req.body.email });
     if (existUser === null) {
       console.log("Email is wrong");
       // Login auth error
       return res.status(401).send({ message: "Email or password is wrong" });
     }
+
     // Перевірка наданого password на валідність (compare() перевіряє чи є 2й аргумент захешованою версією 1го, повертає boolean )
     const isMatch = await bcrypt.compare(req.body.password, existUser.password);
     if (isMatch === false) {
@@ -81,14 +93,22 @@ export const loginUser = async (req, res, next) => {
       return res.status(401).send({ message: "Email or password is wrong" });
     }
 
-    // -----------  створення токену ----------------- //
+    // логін користувача не дозволено, якщо не верифіковано його email
+    if (existUser.verify === false) {
+      return res
+        .status(401)
+        .send({ message: "Please verify your email before login" });
+    }
+
+    // -----------  створення JWT-токену ----------------- //
 
     // Створюємо payload об'єкт
-    console.log("Creating token...");
     const payload = { id: existUser.id };
+
     // Отримання значення  SECRET з змінної середовища, файлу .env
     const secret = process.env.SECRET;
-    // збірка токену, виклик функції кодування з модуля jsonwebtoken
+
+    // створення JWT-токену, виклик функції кодування з модуля jsonwebtoken з встановленням циклу життя expiresIn 23години
     const token = jwt.sign(payload, secret, { expiresIn: "23h" });
 
     // Збереження токена в поточному користувачі
@@ -98,14 +118,13 @@ export const loginUser = async (req, res, next) => {
     // Login success response
 
     res.status(200).json({
-      token: token,
+      token,
       user: {
         email: req.body.email,
         subscription: "starter",
       },
     });
   } catch (error) {
-    console.log("Error:", error);
     next(error);
   }
 };
