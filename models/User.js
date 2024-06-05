@@ -24,11 +24,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      required: [true, "Verify token is required"],
+    },
   },
   { versionKey: false } // відключення додавання параметру __v (версіонування)
 );
-// Створення моделі на основі схеми
-// const User = mongoose.model("User", userSchema);
-// Перевірка, чи модель вже існує
+
+// Створення моделі на основі схеми User та перевірка, чи модель User вже існує
 const User = mongoose.models.User || mongoose.model("User", userSchema);
+
 export default User;

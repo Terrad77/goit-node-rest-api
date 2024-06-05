@@ -1,6 +1,5 @@
 import express from "express";
 import AuthController from "../controllers/authControllers.js";
-
 import authTokenUsePassport from "../middleware/authTokenUsePassport.js";
 
 // midleware для репарсеру req.body
